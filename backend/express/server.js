@@ -53,8 +53,8 @@ app.post("/gemini", upload.single("image"), async (req, res) => {
         {
           parts: [
             { inline_data: { mime_type: "image/jpeg", data: base64Image } }, // Image part
-            { text: `Give 3 adjectives about the '${object}' in this image. You can use adjectives 
-            like colour, material, texture, size, etc. Also, provide the equivalent '${language}' translations. 
+            { text: `Give me the '${language}' translation for the word '${object}'. Additionally, give 3 adjectives about the '${object}' in this image. You can use adjectives 
+            like colour, material, texture, size, etc. Also, provide the equivalent translations. 
             In your response, only give me an array of objects with the english words and translations as key value pairs 
             where keys are "english" and "translation"` }, // Prompt part
           ],
