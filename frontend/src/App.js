@@ -6,6 +6,8 @@ import Star from './images/star_icon.png';
 import CameraComponent from './components/CameraComponent.js';
 import { useEffect, useState } from 'react';
 import mascotTexture from './images/mascot_baseColor.png'
+import ThreeDComponent from './components/ThreeDComponent.js';
+import mascot from './images/mascot.glb';
 
 function App() {
   const [selectedLanguage, setSelectedLanguage] = useState('English');
