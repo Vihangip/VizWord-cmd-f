@@ -4,7 +4,7 @@ import Navbar from './components/navbar.js';
 import Dictionary from './images/your_dictionary.png';
 import Star from './images/star_icon.png';
 import CameraComponent from './components/CameraComponent.js';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function App() {
   const [selectedLanguage, setSelectedLanguage] = useState('English');
@@ -70,7 +70,12 @@ function App() {
     ]
   }
 
-  console.log(`Dropdown: My object is extensible? ${Object.isExtensible(props)}`);
+  useEffect(() => { 
+    if (objectData) {
+      console.log(objectData);
+    }
+  }
+  , [objectData])
 
   return (
     <div className="App">
@@ -89,7 +94,7 @@ function App() {
           </div>
         </div>
         <div style={child}>
-          <Chat props={props}/>
+          <Chat props={objectData} resetObjectData={() => setObjectData(null)}/>
         </div>
       </div>
     </div>

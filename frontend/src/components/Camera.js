@@ -30,6 +30,7 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   };
 
   const captureImage = () => {
+    onResultsUpdate(null);
     let timeLeft = 3;
     setCountdown(timeLeft);
 
