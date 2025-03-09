@@ -1,42 +1,48 @@
-import React, { Suspense, useEffect, useRef } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, Center, Bounds, useBounds } from '@react-three/drei';
+import { useGLTF, Center, Bounds, useBounds, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 // This component centers and scales the model to fit the view
 function ModelWithBounds({ modelPath, texturePath }) {
   const { scene } = useGLTF(modelPath);
-  const texture = new THREE.TextureLoader().load(texturePath);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.flipY = false;
+  const [textureLoaded, setTextureLoaded] = useState(false);
+  const textureRef = useRef(null);
   
   useEffect(() => {
-    if (scene) {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(texturePath, (loadedTexture) => {
+      loadedTexture.colorSpace = THREE.SRGBColorSpace;
+      loadedTexture.flipY = false;
+      textureRef.current = loadedTexture;
+      setTextureLoaded(true);
+    });
+  }, [texturePath]);
+  
+  useEffect(() => {
+    if (scene && textureLoaded && textureRef.current) {
       scene.traverse((child) => {
         if (child.isMesh) {
-          child.material.map = texture;
-          child.material.map.wrapS = THREE.RepeatWrapping;
-          child.material.map.wrapT = THREE.RepeatWrapping;
-          child.material.roughness = 0.8; // Increase roughness to reduce glossiness
-          child.material.metalness = 0.1; // Decrease metalness to make it less metallic
+          const texture = textureRef.current;
+          
+          // Create a new MeshToonMaterial with the texture
           child.material = new THREE.MeshToonMaterial({
             map: texture,
-        });
+          });
+          
+          // Configure texture
+          child.material.map.wrapS = THREE.RepeatWrapping;
+          child.material.map.wrapT = THREE.RepeatWrapping;
           child.material.needsUpdate = true;
-          child.geometry.attributes.uv.needsUpdate = true;
-          child.material.vertexColors = false;
-
-          if (child.material.map) {
-            child.material.map = texture;
-            child.material.map.needsUpdate = true;
+          
+          // Update UVs if needed
+          if (child.geometry.attributes.uv) {
+            child.geometry.attributes.uv.needsUpdate = true;
           }
-
-          if (child.material.roughness === undefined) child.material.roughness = 0.5;
-          if (child.material.metalness === undefined) child.material.metalness = 0.5;
         }
       });
     }
-  }, [scene, texture]);
+  }, [scene, textureLoaded]);
   
   return (
     <group>
@@ -57,7 +63,25 @@ function SceneBounds({ children }) {
   return children;
 }
 
-function ThreeDComponent({ modelPath, texturePath }) {
+// Pendulum-like animation component that swings back and forth (180 degrees max)
+function PendulumModel({ children, speed = 0.5, maxRotation = Math.PI / 2 }) {
+  const groupRef = useRef();
+  
+  useFrame(({ clock }) => {
+    if (groupRef.current) {
+      // Create oscillating motion using a sine wave
+      // Sin returns values between -1 and 1, so multiplying by maxRotation gives us our desired range
+      groupRef.current.rotation.y = Math.sin(clock.getElapsedTime() * speed) * maxRotation;
+    }
+  });
+  
+  return <group ref={groupRef}>{children}</group>;
+}
+
+function ThreeDComponent({ modelPath, texturePath, rotationSpeed = 0.5 }) {
+  // Convert 180 degrees to radians (Math.PI is 180 degrees)
+  const maxRotationRadians = Math.PI / 4; // 90 degrees in each direction = 180 degrees total
+  
   return (
     <div style={{
       position: 'absolute',
@@ -67,30 +91,38 @@ function ThreeDComponent({ modelPath, texturePath }) {
       width: '250px',
       height: '300px',
       zIndex: 10,
+      cursor: 'grab',
     }}>
       <Canvas 
         gl={{ colorSpace: THREE.LinearSRGBColorSpace }}
-        camera={{ position: [60, 10, 40], fov: 30 }}
-        // Disable all controls/interactions
-        onPointerDown={(e) => e.stopPropagation()}
-        onWheel={(e) => e.stopPropagation()}
+        camera={{ position: [60, 10, 20], fov: 30 }}
       >
         {/* Lighting */}
         <ambientLight intensity={1.5} />
         <directionalLight intensity={1} position={[5, 5, 5]} />
         <directionalLight intensity={0.4} position={[-5, 5, -5]} />
         
-        
         {/* Bounds component to fit the model to view */}
         <Bounds clip observe margin={0.9}>
           <Suspense fallback={null}>
             <SceneBounds>
               <Center>
-                <ModelWithBounds modelPath={modelPath} texturePath={texturePath}/>
+                <PendulumModel speed={rotationSpeed} maxRotation={maxRotationRadians}>
+                  <ModelWithBounds modelPath={modelPath} texturePath={texturePath}/>
+                </PendulumModel>
               </Center>
             </SceneBounds>
           </Suspense>
         </Bounds>
+        
+        {/* OrbitControls for manual interaction */}
+        <OrbitControls 
+          enableZoom={true}
+          enablePan={true}
+          enableRotate={true}
+          minDistance={10}
+          maxDistance={100}
+        />
       </Canvas>
     </div>
   );
