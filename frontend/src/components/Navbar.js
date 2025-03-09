@@ -30,7 +30,7 @@ const Navbar = () => {
     }
 
     return (
-        <div style={background} maxWidth={false}>
+        <div className="nav-bar" style={background} maxWidth={false}>
           <div style={leftSide}>
             <img src={Logo} alt="VizWord Logo" width={60} height={60}/>
             <h1 style={{color: 'var(--white)', font: 'Helvetica-Bold' }}>VizWord</h1>

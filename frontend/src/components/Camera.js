@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import './App.css';
+import CameraIcon from '../images/camera_icon.png';
+import '../App.css';
 
 function Camera({ selectedLanguage, onResultsUpdate }) {
   const videoRef = useRef(null);
@@ -8,6 +9,14 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   const [capturedImage, setCapturedImage] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const photoButton = {
+    backgroundColor: "var(--purple)",
+    borderRadius: "var(--border)",
+    width: '170px',
+    height: '40px',
+    alignItems: 'center'
+  }
 
   const startCamera = () => {
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -37,8 +46,8 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   const takePicture = async () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext("2d");
-      const videoWidth = videoRef.current.videoWidth;
-      const videoHeight = videoRef.current.videoHeight;
+      const videoWidth = videoRef.current.width;
+      const videoHeight = videoRef.current.height;
   
       // Set canvas dimensions to match the crop size
       canvasRef.current.width = videoWidth * 0.4;
@@ -125,14 +134,19 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   }, []);
 
   return (
-    <div className="App">
-        <div className="camera-container">
+    <div className="App" style={{minWidth: '100%', backgroundColor: 'var(--white)'}}>
+        <div className="camera-container" style={{width: '100%', marginBottom: '10px'}}>
           <video 
             ref={videoRef} 
             autoPlay 
             playsInline 
             className="video-feed" 
-            style={{ transform: "scaleX(-1)" }} 
+            style={{ 
+              transform: "scaleX(-1)",
+              backgroundColor: 'var(--white)',
+              borderRadius: 'var(--border)' }
+            } 
+            width="100%"
           />
           
           {cameraActive && (
@@ -150,11 +164,15 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
         
         <div className="controls">
           {!cameraActive ? (
-            <button onClick={startCamera}>Start Camera</button>
+            <button onClick={startCamera} style={photoButton}>
+              <img src={CameraIcon} alt="camera" width={20} height={20} style={{ marginRight: '10px' }}/>
+              Start Camera
+            </button>
           ) : (
             <button 
               onClick={captureImage} 
               disabled={countdown > 0 || isProcessing}
+              style={photoButton}
             >
               {countdown > 0 
                 ? `Capturing in ${countdown}...` 

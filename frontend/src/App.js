@@ -1,10 +1,9 @@
 import './App.css';
-import { Button } from '@mui/material';
 import Chat from './components/chat.js';
 import Navbar from './components/navbar.js';
-import Camera from './images/camera_icon.png';
 import Dictionary from './images/your_dictionary.png';
-import CameraComponent from './CameraComponent.js';
+import Star from './images/star_icon.png';
+import CameraComponent from './components/CameraComponent.js';
 
 function App() {
 
@@ -20,28 +19,7 @@ function App() {
     padding: '20px',
     width: '100%',
     height: '100%',
-    overflow: 'hidden'
-  }
-
-  const camerabox = {
-    backgroundColor: 'var(--yellow)',
-    width: '100%',
-    height: '60%',
-    borderRadius: 'var(--border)'
-  }
-
-  const photoButtonArea = { 
-    display: 'flex',
-    height: '5%',
-    paddingTop: '15px',
-    paddingBottom: '20px',
-    justifyContent: 'flex-start'
-  }
-
-  const photoButton = {
-    borderRadius: "var(--border)",
-    width: '168px',
-    height: '40px'
+    //overflow: 'hidden'
   }
 
   const dictonaryArea = {
@@ -49,8 +27,26 @@ function App() {
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundColor: 'var(--pink)',
-    width: '80%',
-    height: '90%',
+    borderRadius: 'var(--border)',
+    width: '60%',
+    height: '85%',
+    padding: '50px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '20px'
+  }
+
+  const dictionaryLabel = {
+    backgroundColor: 'var(--white)',
+    borderRadius: 'var(--border)',
+    width: '300px',
+    height: '30px',
+    display: 'flex',
+    justifyContents: 'center',
+    alignItems: 'center',
+    padding: '20px',
+    gap: '20px'
   }
 
   return (
@@ -58,15 +54,15 @@ function App() {
       <Navbar/>
       <div style={parent}>
         <div style={child}>
-        <div style={camerabox}/>
-          <div style={photoButtonArea}>
-            <Button variant="contained" color="secondary" sx={photoButton}>
-              <img src={Camera} alt="camera" width={20} height={20} style={{ marginRight: '10px' }}/>
-              Take A Photo
-            </Button>
+          <div style={{borderRadius: 'var(--border)', paddingBottom: '30px'}}>
+            <CameraComponent/>
           </div>
           <div style={dictonaryArea}>
-            <h1 style={{margin: 0}}>Testing</h1>
+            <h1 style={{margin: 0, color: 'var(--white)'}}>Your Dictionary</h1>
+            <div style={dictionaryLabel}>
+              <img src={Star} width={30} height={30}/>
+              <h2 style={{margin: 0, color: 'var(--black)'}}>7 Objects</h2>
+            </div>
           </div>
         </div>
         <div style={child}>
