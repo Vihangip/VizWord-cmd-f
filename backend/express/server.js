@@ -163,24 +163,33 @@ app.post('/process-image', upload.single('image'), async (req, res) => {
     geminiFormData.append('language', language);
 
     console.log("Sending request to Gemini endpoint...");
-    // const geminiResponse = await axios.post('http://localhost:3001/gemini', geminiFormData, {
-    //   headers: geminiFormData.getHeaders(),
-    // });
+    const geminiAdjectivesResponse = await axios.post('http://localhost:3001/gemini-adjectives', geminiFormData, {
+      headers: geminiFormData.getHeaders(),
+    });
 
-    // const responseData = {
-    //   object: object, // Selected object excluding "person" if necessary
-    //   adjectives: geminiResponse.data.response // Extracted adjectives from Gemini response
-    // };
-    
+    const translationResponse = await axios.post('http://localhost:3001/gemini-translate', {
+      object: object,
+      language: language
+    });
+    const translation = translationResponse.data.result;
+    console.log(`Translation result: ${translation}`);
+
     const responseData = {
-       object: 'apple',
-       translation: 'Manzana',
-       adjectives: [
-         { english: 'clear', translation: 'claro/transparente' },
-         { english: 'cylindrical', translation: 'cilíndrico' },
-         { english: 'glass', translation: 'vidrio' }
-       ]
-     }
+      object: object,
+      translation: translation,
+      adjectives: geminiAdjectivesResponse.data.response 
+    };
+    
+    
+    // const responseData = {
+    //   object: 'apple',
+    //   translation: 'Manzana',
+    //   adjectives: [
+    //     { english: 'clear', translation: 'claro/transparente' },
+    //     { english: 'cylindrical', translation: 'cilíndrico' },
+    //     { english: 'glass', translation: 'vidrio' }
+    //   ]
+    // }
     console.log("Final response:", responseData); // Debugging log
     
     return res.json(responseData);
