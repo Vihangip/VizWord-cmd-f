@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Refresh from '../images/refresh_icon.png';
 
 const Chat = ({ props }) => {
   const [messages, setMessages] = useState([]);
@@ -273,9 +274,12 @@ const Chat = ({ props }) => {
   
   const resetButton = {
     ...optionButton,
+    display: 'flex',
+    justifyContent: 'center',
     backgroundColor: 'var(--purple)',
     color: 'white',
-    marginTop: '15px'
+    marginTop: '15px',
+    alignItems: 'center'
   };
   
   return (
@@ -302,6 +306,7 @@ const Chat = ({ props }) => {
         
         {showReset && (
         <button style={resetButton} onClick={handleResetClick}>
+            <img src={Refresh} alt="new try" width={20} height={20} style={{ marginRight: '10px' }}/>
             New Photo
         </button>
         )}

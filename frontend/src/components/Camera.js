@@ -11,6 +11,8 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const photoButton = {
+    display: 'flex',
+    justifyContent: 'center',
     backgroundColor: "var(--purple)",
     borderRadius: "var(--border)",
     width: '170px',
@@ -191,6 +193,7 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
               disabled={countdown > 0 || isProcessing}
               style={photoButton}
             >
+              <img src={CameraIcon} alt="camera" width={20} height={20} style={{ marginRight: '10px' }}/>
               {countdown > 0 
                 ? `Capturing in ${countdown}...` 
                 : isProcessing
