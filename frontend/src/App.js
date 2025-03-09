@@ -5,6 +5,7 @@ import Dictionary from './images/your_dictionary.png';
 import Star from './images/star_icon.png';
 import CameraComponent from './components/CameraComponent.js';
 import { useEffect, useState } from 'react';
+import mascotTexture from './images/mascot_baseColor.png'
 
 function App() {
   const [selectedLanguage, setSelectedLanguage] = useState('English');
@@ -96,7 +97,7 @@ function App() {
         <div style={child}>
           <Chat props={objectData} resetObjectData={() => setObjectData(null)}/>
         </div>
-        <ThreeDComponent modelPath={mascot} />
+        <ThreeDComponent modelPath={mascot} texturePath={mascotTexture}/>
       </div>
     </div>
   );
