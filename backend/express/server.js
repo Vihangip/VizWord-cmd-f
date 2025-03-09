@@ -142,14 +142,15 @@ app.post('/process-image', upload.single('image'), async (req, res) => {
 
     // Step 2: Process detections and send the result to /gemini endpoint
     const detectedObjects = detections.map((detection) => detection.class);
+    // const detectedObjects= ["apple", "person"];
     console.log(`Detected objects: ${detectedObjects.join(", ")}`);
 
     // Determine the object to send
     let object;
-    if (detectedObjects.length === 2 && detectedObjects.includes("person")) {
+    if (detectedObjects.includes("person")) {
     object = detectedObjects.find((obj) => obj !== "person"); // Get the non-person object
     } else {
-    object = detectedObjects.join(", "); // If only one object, use it directly
+    object = detectedObjects[0] // If only one object, use it directly
     }
 
     console.log(`Selected object: ${object}`);
