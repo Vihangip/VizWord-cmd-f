@@ -36,3 +36,37 @@
     transform: rotate(360deg);
   }
 }
+
+.video-feed {
+  width: 100%;
+  max-width: 400px;  /* Adjust the max width */
+  height: auto;
+  border: 2px solid white;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.captured-image {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 300px;
+  border: 2px solid green;
+  border-radius: 10px;
+}
+
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+
