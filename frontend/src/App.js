@@ -96,6 +96,7 @@ function App() {
         <div style={child}>
           <Chat props={objectData} resetObjectData={() => setObjectData(null)}/>
         </div>
+        <ThreeDComponent modelPath={mascot} />
       </div>
     </div>
   );
