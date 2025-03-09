@@ -1,23 +1,8 @@
-.white {
-    color: #FFFFFF;
-}
-
-.cream {
-    color: #FAECD8;
-}
-
-.yellow {
-    color: #FFB226;
-}
-
-.pink {
-    color: #EE5D7E;
-}
-
-.purple {
-    color: #9A348E;
-}
-
-.black {
-    color: #0D0628;
-}
+:root {
+    --white: #FFFFFF;
+    --cream: #FAECD8;
+    --yellow:#FFB226;
+    --pink: #EE5D7E;
+    --purple: #9A348E;
+    --black: #0D0628;
+  }
