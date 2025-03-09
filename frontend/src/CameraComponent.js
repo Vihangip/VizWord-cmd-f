@@ -9,6 +9,13 @@ function Camera() {
   const [cameraActive, setCameraActive] = useState(false);
   const [detections, setDetections] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("French");
+  const [translations, setTranslations] = useState([]);
+
+  const languages = [
+    "French", "Spanish", "German", "Italian", "Japanese", 
+    "Chinese", "Hindi", "Arabic", "Portuguese", "Russian"
+  ];
 
   const startCamera = () => {
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -65,7 +72,7 @@ function Camera() {
       const imageDataUrl = canvasRef.current.toDataURL("image/png");
       setCapturedImage(imageDataUrl);
       
-      // Send image to Flask server for object detection
+      // Send image to server for processing
       await sendImageToServer(imageDataUrl);
     }
   };
@@ -74,6 +81,7 @@ function Camera() {
     try {
       setIsProcessing(true);
       setDetections([]);
+      setTranslations([]);
       
       // Convert base64 to blob
       const response = await fetch(imageDataUrl);
@@ -82,19 +90,34 @@ function Camera() {
       // Create form data
       const formData = new FormData();
       formData.append('image', blob, 'captured-image.png');
+      formData.append('language', selectedLanguage);
       
-      // Send to Flask server
-      const serverResponse = await fetch('http://localhost:3002/detect', {
+      // Send to Express server
+      console.log(`Sending image to server with language: ${selectedLanguage}`);
+      const expressResponse = await fetch('http://localhost:3000/process-image', {
         method: 'POST',
         body: formData
       });
       
-      if (!serverResponse.ok) {
-        throw new Error(`Server responded with ${serverResponse.status}`);
+      if (!expressResponse.ok) {
+        throw new Error(`Server responded with ${expressResponse.status}`);
       }
       
-      const data = await serverResponse.json();
-      setDetections(data.detections || []);
+      const data = await expressResponse.json();
+      console.log("Server response:", data);
+      
+      // Process response
+      if (data.response) {
+        // Set translations from the Gemini response
+        setTranslations(data.response);
+        
+        // If you need to integrate with detection data
+        if (data.detections) {
+          setDetections(data.detections);
+        }
+      } else if (data.error) {
+        console.error("Server returned an error:", data.error);
+      }
     } catch (error) {
       console.error("Error sending image to server:", error);
     } finally {
@@ -112,7 +135,6 @@ function Camera() {
     };
   }, []);
 
-  // Helper function to draw bounding boxes on the captured image
   const renderDetectionBoxes = () => {
     if (!capturedImage || detections.length === 0) return null;
     
@@ -150,6 +172,20 @@ function Camera() {
   return (
     <div className="App">
       <header className="App-header">
+        <div className="language-selector">
+          <label htmlFor="language-select">Translate to: </label>
+          <select 
+            id="language-select"
+            value={selectedLanguage}
+            onChange={(e) => setSelectedLanguage(e.target.value)}
+            disabled={isProcessing}
+          >
+            {languages.map((lang) => (
+              <option key={lang} value={lang}>{lang}</option>
+            ))}
+          </select>
+        </div>
+        
         <div className="camera-container">
           <video 
             ref={videoRef} 
@@ -214,6 +250,28 @@ function Camera() {
             ) : capturedImage ? (
               <p>No objects detected</p>
             ) : null}
+            
+            {translations.length > 0 && (
+              <div className="translation-results">
+                <h3>Adjectives and Translations:</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>English</th>
+                      <th>{selectedLanguage}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {translations.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.english}</td>
+                        <td>{item.translation}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </header>
