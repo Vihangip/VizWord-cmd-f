@@ -1,58 +1,62 @@
-const express = require('express');
-const {
-  GoogleGenerativeAI,
-  HarmCategory,
-  HarmBlockThreshold,
-} = require("@google/generative-ai");
-require('dotenv').config();
+const express = require("express");
+const multer = require("multer");
+const fs = require("fs");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require("dotenv").config();
 
 const app = express();
 app.use(express.json());
 
-const apiKey = process.env.GEMINI_API_KEY;
+// Set up Multer to handle file uploads
+const upload = multer({ dest: "uploads/" });
 
+const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
   console.error("Missing GEMINI_API_KEY environment variable.");
   process.exit(1);
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);
+const MODEL_NAME = "gemini-1.5-pro"; // Make sure the model supports images
 
-const MODEL_NAME = "gemini-2.0-pro-exp-02-05"; 
-
-const generationConfig = {
-  temperature: 1,
-  topP: 0.95,
-  topK: 64,
-  maxOutputTokens: 8192,
-  responseMimeType: "text/plain",
-};
-
-app.post('/gemini', async (req, res) => {
+app.post("/gemini-image", upload.single("image"), async (req, res) => {
   try {
     const { object, language } = req.body;
-
-    if (!object && !language) {
-      return res.status(400).json({ error: "Prompt is required." });
+    if (!req.file) {
+      return res.status(400).json({ error: "Image is required." });
     }
 
-    const model = genAI.getGenerativeModel({
-      model: MODEL_NAME,
+    // Convert the image file to base64
+    const imageBuffer = fs.readFileSync(req.file.path);
+    const base64Image = imageBuffer.toString("base64");
+
+    // Prepare request for Gemini API
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+
+    const result = await model.generateContent({
+      contents: [
+        {
+          parts: [
+            { inline_data: { mime_type: "image/jpeg", data: base64Image } }, // Image part
+            { text: `Give 3 adjectives about the '${object}' in this image. You can use adjectives 
+            like colour, material, texture, size, etc. Also, provide the equivalent '${language}' translations. 
+            In your response, only give me an array of objects with the english words and translations as key value pairs 
+            where keys are "english" and "translation"` }, // Prompt part
+          ],
+        },
+      ],
     });
 
-    const chatSession = model.startChat({
-      generationConfig,
-      history: [], 
-    });
+    // Clean and parse the response text
+    const responseText = result.response.text().trim();
+    const cleanedResponse = responseText.replace(/```json\n|\n```/g, ""); // Remove code block formatting
+    const parsedResponse = JSON.parse(cleanedResponse); // Parse the cleaned JSON
 
-    const result = await chatSession.sendMessage("give me the answer only. what is " + object + " in " + language + "?");
-    let response = result.response.text();
-    response = response.trim();
-
-    res.json({ result: response });
+    // Send formatted response
+    res.json({ response: parsedResponse });
   } catch (error) {
-    console.error("Error generating content:", error);
-    res.status(500).json({ error: "Failed to generate content.", details: error.message });
+    console.error("Error processing image:", error);
+    res.status(500).json({ error: "Failed to process image.", details: error.message });
   }
 });
 
