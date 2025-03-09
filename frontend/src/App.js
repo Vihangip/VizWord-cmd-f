@@ -5,6 +5,8 @@ import Navbar from './components/navbar.js';
 import Camera from './images/camera_icon.png';
 import Dictionary from './images/your_dictionary.png';
 import CameraComponent from './CameraComponent.js';
+import ThreeDComponent from './components/ThreeDComponent.js'; 
+import mascot from './images/mascot.glb';
 
 function App() {
 
@@ -59,19 +61,20 @@ function App() {
       <div style={parent}>
         <div style={child}>
         <div style={camerabox}/>
-          <div style={photoButtonArea}>
-            <Button variant="contained" color="secondary" sx={photoButton}>
-              <img src={Camera} alt="camera" width={20} height={20} style={{ marginRight: '10px' }}/>
-              Take A Photo
-            </Button>
-          </div>
-          <div style={dictonaryArea}>
-            <h1 style={{margin: 0}}>Testing</h1>
-          </div>
+        <div style={photoButtonArea}>
+          <Button variant="contained" color="secondary" sx={photoButton}>
+            <img src={Camera} alt="camera" width={20} height={20} style={{ marginRight: '10px' }}/>
+            Take A Photo
+          </Button>
+        </div>
+        <div style={dictonaryArea}>
+          <h1 style={{margin: 0}}>Testing</h1>
+        </div>
         </div>
         <div style={child}>
           <Chat/>
         </div>
+        <ThreeDComponent modelPath={mascot} />
       </div>
     </div>
   );
