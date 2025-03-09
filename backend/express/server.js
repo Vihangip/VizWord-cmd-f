@@ -1,58 +1,62 @@
-const express = require("express");
-const multer = require("multer");
-const axios = require("axios");
-const cors = require("cors");
-require("dotenv").config();
+const express = require('express');
+const {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} = require("@google/generative-ai");
+require('dotenv').config();
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
-const upload = multer({ dest: "uploads/" }); // Store images temporarily
+const apiKey = process.env.GEMINI_API_KEY;
 
-// 🖼️ Route: Receive Image from Frontend & Send to Flask Server
-app.post("/upload", upload.single("image"), async (req, res) => {
+if (!apiKey) {
+  console.error("Missing GEMINI_API_KEY environment variable.");
+  process.exit(1);
+}
+
+const genAI = new GoogleGenerativeAI(apiKey);
+
+const MODEL_NAME = "gemini-2.0-pro-exp-02-05"; 
+
+const generationConfig = {
+  temperature: 1,
+  topP: 0.95,
+  topK: 64,
+  maxOutputTokens: 8192,
+  responseMimeType: "text/plain",
+};
+
+app.post('/gemini', async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No image uploaded" });
+    const { object, language } = req.body;
+
+    if (!object && !language) {
+      return res.status(400).json({ error: "Prompt is required." });
     }
 
-    const flaskServerUrl = "http://localhost:5001/detect"; // Adjust to Flask server URL
-
-    // Send image to Flask
-    const formData = new FormData();
-    formData.append("image", req.file);
-
-    const flaskResponse = await axios.post(flaskServerUrl, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    const model = genAI.getGenerativeModel({
+      model: MODEL_NAME,
     });
 
-    const detectedObject = flaskResponse.data.object; // Flask returns detected object
-
-    // Get translation from Gemini API
-    const geminiResponse = await axios.post(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
-      {
-        prompt: `Translate "${detectedObject}" into multiple languages.`,
-      },
-      {
-        headers: { Authorization: `Bearer ${process.env.GEMINI_API_KEY}` },
-      }
-    );
-
-    const translation = geminiResponse.data.translations; // Adjust based on API response
-
-    // Send JSON response to frontend
-    res.json({
-      object: detectedObject,
-      translation,
+    const chatSession = model.startChat({
+      generationConfig,
+      history: [], 
     });
+
+    const result = await chatSession.sendMessage("give me the answer only. what is " + object + " in " + language + "?");
+    let response = result.response.text();
+    response = response.trim();
+
+    res.json({ result: response });
   } catch (error) {
-    console.error("Error:", error.message);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error generating content:", error);
+    res.status(500).json({ error: "Failed to generate content.", details: error.message });
   }
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
