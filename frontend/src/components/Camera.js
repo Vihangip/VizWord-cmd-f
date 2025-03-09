@@ -46,8 +46,8 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   const takePicture = async () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext("2d");
-      const videoWidth = videoRef.current.width;
-      const videoHeight = videoRef.current.height;
+      const videoWidth = videoRef.current.videoWidth || 640;
+      const videoHeight = videoRef.current.videoHeight || 480;
   
       // Set canvas dimensions to match the crop size
       canvasRef.current.width = videoWidth * 0.4;
@@ -82,9 +82,26 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
     try {
       setIsProcessing(true);
       
-      // Convert base64 to blob
-      const response = await fetch(imageDataUrl);
-      const blob = await response.blob();
+      // Convert base64 to blob properly
+      // Remove the data URL prefix (e.g., "data:image/png;base64,")
+      const base64Data = imageDataUrl.split(',')[1];
+      
+      // Decode base64 string to binary
+      const binaryString = atob(base64Data);
+      
+      // Create an array buffer to hold the binary data
+      const bytes = new Uint8Array(binaryString.length);
+      
+      // Convert binary string to byte array
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      // Create a blob with the correct MIME type
+      const blob = new Blob([bytes], { type: 'image/png' });
+      
+      // Verify the blob has content
+      console.log(`Blob size: ${blob.size} bytes`);
       
       // Create form data
       const formData = new FormData();
@@ -106,7 +123,6 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
       console.log("Server response:", data);
       
       // Pass the entire response data to the parent component
-      // This ensures we're not making assumptions about the structure
       if (data) {
         // Check if the response is in the expected format
         if (data.response) {
