@@ -8,15 +8,13 @@ function DropdownMenu() {
         setSelectedOption(event.target.value);
     };
     
-    const vSpace = 10;
-
     const select = {
         width: 300,
-        backgroundColor: 'var(--white)'
+        borderRadius: 'var(--border)'
     }
 
     return (
-        <FormControl variant="filled">
+        <FormControl variant="filled" style={{backgroundColor: 'var(--white)', borderRadius: 'var(--border)'}}>
             <InputLabel id="demo-simple-select-outlined-label">Select Your Learning Language</InputLabel>
             <Select
                 labelId="demo-simple-select-outlined-label"
@@ -27,12 +25,12 @@ function DropdownMenu() {
                 label="Select your Learning Language"
                 style={select}
             >
-                <MenuItem value={vSpace}>English</MenuItem>
-                <MenuItem value={2*vSpace}>French</MenuItem>
-                <MenuItem value={3*vSpace}>German</MenuItem>
-                <MenuItem value={4*vSpace}>Mandarin</MenuItem>
-                <MenuItem value={5*vSpace}>Spanish</MenuItem>
-                <MenuItem value={6*vSpace}>Tamil</MenuItem>
+                <MenuItem value={1}>English</MenuItem>
+                <MenuItem value={2}>French</MenuItem>
+                <MenuItem value={3}>German</MenuItem>
+                <MenuItem value={4}>Mandarin</MenuItem>
+                <MenuItem value={5}>Spanish</MenuItem>
+                <MenuItem value={6}>Tamil</MenuItem>
             </Select>
         </FormControl>
     );
