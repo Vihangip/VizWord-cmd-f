@@ -1,6 +1,6 @@
 from ultralytics import YOLO 
-import cvzone
-import cv2
+# import cvzone
+# import cv2
 
 # Detectiong on images
 model = YOLO("yolo11n.pt")
