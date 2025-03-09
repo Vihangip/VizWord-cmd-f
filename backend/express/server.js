@@ -1,14 +1,22 @@
 const express = require("express");
 const multer = require("multer");
+const axios = require('axios');
 const fs = require("fs");
+const path = require("path");
+const FormData = require('form-data');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config();
 
-const app = express();
-app.use(express.json());
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
-// Set up Multer to handle file uploads
-const upload = multer({ dest: "uploads/" });
+const app = express();
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
@@ -17,17 +25,18 @@ if (!apiKey) {
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);
-const MODEL_NAME = "gemini-1.5-pro"; // Make sure the model supports images
+const MODEL_NAME = "gemini-2.0-pro-exp-02-05";
 
-app.post("/gemini-image", upload.single("image"), async (req, res) => {
+app.post("/gemini", upload.single("image"), async (req, res) => {
   try {
+    console.log("sending to gemini");
     const { object, language } = req.body;
     if (!req.file) {
       return res.status(400).json({ error: "Image is required." });
     }
 
     // Convert the image file to base64
-    const imageBuffer = fs.readFileSync(req.file.path);
+    const imageBuffer = req.file.buffer;
     const base64Image = imageBuffer.toString("base64");
 
     // Prepare request for Gemini API
@@ -47,12 +56,11 @@ app.post("/gemini-image", upload.single("image"), async (req, res) => {
       ],
     });
 
-    // Clean and parse the response text
     const responseText = result.response.text().trim();
-    const cleanedResponse = responseText.replace(/```json\n|\n```/g, ""); // Remove code block formatting
-    const parsedResponse = JSON.parse(cleanedResponse); // Parse the cleaned JSON
+    const cleanedResponse = responseText.replace(/```json\n|\n```/g, ""); 
+    const parsedResponse = JSON.parse(cleanedResponse); 
+    console.log("gemini response", parsedResponse);
 
-    // Send formatted response
     res.json({ response: parsedResponse });
   } catch (error) {
     console.error("Error processing image:", error);
@@ -60,14 +68,35 @@ app.post("/gemini-image", upload.single("image"), async (req, res) => {
   }
 });
 
-app.post('/process-image', async (req, res) => {
+app.post('/process-image', upload.single('image'), async (req, res) => {
+  let tempFilePath = null;
+  
   try {
-    const image = req.body;
+    console.log("received by backend");
+    const language = req.body.language; 
+    const image = req.file;
 
-    // Step 1: Send image to Flask /detect endpoint
-    const flaskResponse = await axios.post('http://localhost:3002/detect', image, {
-      headers: { 'Content-Type': 'application/octet-stream' },
+    if (!image) {
+      return res.status(400).json({ error: 'No image uploaded.' });
+    }
+    if (!language) {
+      return res.status(400).json({ error: 'Language parameter is required.' });
+    }
+
+    const uniqueFilename = `image_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.jpg`;
+    tempFilePath = path.join(uploadsDir, uniqueFilename);
+    
+    fs.writeFileSync(tempFilePath, image.buffer);
+    console.log(`Temporary file created at: ${tempFilePath}`);
+
+    const flaskFormData = new FormData();
+    flaskFormData.append('image', fs.createReadStream(tempFilePath));
+
+    console.log("Sending request to Flask server...");
+    const flaskResponse = await axios.post("http://127.0.0.1:3002/detect", flaskFormData, {
+      headers: flaskFormData.getHeaders(),
     });
+    console.log("Received response from Flask server");
 
     const detections = flaskResponse.data.detections;
     if (!detections || detections.length === 0) {
@@ -76,18 +105,37 @@ app.post('/process-image', async (req, res) => {
 
     // Step 2: Process detections and send the result to /gemini endpoint
     const detectedObjects = detections.map((detection) => detection.class).join(', ');
-    const language = 'en'; // Or pass a language parameter as needed
+    console.log(`Detected objects: ${detectedObjects}`);
 
-    const geminiResponse = await axios.post('http://localhost:3000/gemini', {
-      object: detectedObjects,
-      language: language,
+    // Create form data for the Gemini request
+    const geminiFormData = new FormData();
+    geminiFormData.append('image', fs.createReadStream(tempFilePath));
+    geminiFormData.append('object', detectedObjects);
+    geminiFormData.append('language', language);
+
+    console.log("Sending request to Gemini endpoint...");
+    const geminiResponse = await axios.post('http://localhost:3000/gemini', geminiFormData, {
+      headers: geminiFormData.getHeaders(),
     });
 
+    console.log("everything done");
+    console.log("final response", geminiResponse.data);
+    
     // Step 3: Send the final response back to the client
     return res.json(geminiResponse.data);
   } catch (error) {
     console.error('Error processing image:', error);
     return res.status(500).json({ error: 'Failed to process image.', details: error.message });
+  } finally {
+    // Clean up the temporary file
+    if (tempFilePath && fs.existsSync(tempFilePath)) {
+      try {
+        fs.unlinkSync(tempFilePath);
+        console.log(`Temporary file removed: ${tempFilePath}`);
+      } catch (err) {
+        console.error(`Failed to remove temporary file: ${err.message}`);
+      }
+    }
   }
 });
 

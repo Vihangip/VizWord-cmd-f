@@ -8,6 +8,7 @@ model = YOLO("yolo11n.pt")
 
 @app.route("/detect", methods=["POST"])
 def detect_objects():
+    print("recived by yolo")
     if "image" not in request.files:
         return jsonify({"error": "No image uploaded"}), 400
     
@@ -28,8 +29,9 @@ def detect_objects():
                 "confidence": float(confidences[i]),
                 "bbox": box.tolist()
             })
-    
-    return jsonify({"detections": detections})
+    output = jsonify({"detections": detections})
+    print("yolo output", output)
+    return output
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3002, debug=True)
+    app.run(host="127.0.0.1", port=3002, debug=True)
