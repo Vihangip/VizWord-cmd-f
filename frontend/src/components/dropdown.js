@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 
-function DropdownMenu() {
-    const [selectedOption, setSelectedOption] = useState('');
-
+const DropdownMenu = ({ selectedLanguage, setSelectedLanguage }) => {
     const handleChange = (event) => {
-        setSelectedOption(event.target.value);
+        setSelectedLanguage(event.target.value);
     };
     
     const select = {
@@ -19,18 +17,18 @@ function DropdownMenu() {
             <Select
                 labelId="demo-simple-select-outlined-label"
                 id="demo-simple-select-outlined"
-                value={selectedOption}
+                value={selectedLanguage}
                 onChange={handleChange}
                 autoWidth
                 label="Select your Learning Language"
                 style={select}
             >
-                <MenuItem value={1}>English</MenuItem>
-                <MenuItem value={2}>French</MenuItem>
-                <MenuItem value={3}>German</MenuItem>
-                <MenuItem value={4}>Mandarin</MenuItem>
-                <MenuItem value={5}>Spanish</MenuItem>
-                <MenuItem value={6}>Tamil</MenuItem>
+                <MenuItem value={"English"}>English</MenuItem>
+                <MenuItem value={"French"}>French</MenuItem>
+                <MenuItem value={"German"}>German</MenuItem>
+                <MenuItem value={"Mandarin"}>Mandarin</MenuItem>
+                <MenuItem value={"Sinha"}>Sinha</MenuItem>
+                <MenuItem value={"Spanish"}>Spanish</MenuItem>
             </Select>
         </FormControl>
     );

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import './App.css';
+import CameraIcon from '../images/camera_icon.png';
+import '../App.css';
 
 function Camera({ selectedLanguage, onResultsUpdate }) {
   const videoRef = useRef(null);
@@ -8,6 +9,14 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   const [capturedImage, setCapturedImage] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const photoButton = {
+    backgroundColor: "var(--purple)",
+    borderRadius: "var(--border)",
+    width: '170px',
+    height: '40px',
+    alignItems: 'center'
+  }
 
   const startCamera = () => {
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -21,6 +30,7 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   };
 
   const captureImage = () => {
+    onResultsUpdate(null);
     let timeLeft = 3;
     setCountdown(timeLeft);
 
@@ -37,8 +47,8 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   const takePicture = async () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext("2d");
-      const videoWidth = videoRef.current.videoWidth;
-      const videoHeight = videoRef.current.videoHeight;
+      const videoWidth = videoRef.current.videoWidth || 640;
+      const videoHeight = videoRef.current.videoHeight || 480;
   
       // Set canvas dimensions to match the crop size
       canvasRef.current.width = videoWidth * 0.4;
@@ -73,9 +83,26 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
     try {
       setIsProcessing(true);
       
-      // Convert base64 to blob
-      const response = await fetch(imageDataUrl);
-      const blob = await response.blob();
+      // Convert base64 to blob properly
+      // Remove the data URL prefix (e.g., "data:image/png;base64,")
+      const base64Data = imageDataUrl.split(',')[1];
+      
+      // Decode base64 string to binary
+      const binaryString = atob(base64Data);
+      
+      // Create an array buffer to hold the binary data
+      const bytes = new Uint8Array(binaryString.length);
+      
+      // Convert binary string to byte array
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      // Create a blob with the correct MIME type
+      const blob = new Blob([bytes], { type: 'image/png' });
+      
+      // Verify the blob has content
+      console.log(`Blob size: ${blob.size} bytes`);
       
       // Create form data
       const formData = new FormData();
@@ -97,7 +124,6 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
       console.log("Server response:", data);
       
       // Pass the entire response data to the parent component
-      // This ensures we're not making assumptions about the structure
       if (data) {
         // Check if the response is in the expected format
         if (data.response) {
@@ -125,14 +151,19 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
   }, []);
 
   return (
-    <div className="App">
-        <div className="camera-container">
+    <div className="App" style={{minWidth: '100%', backgroundColor: 'var(--white)'}}>
+        <div className="camera-container" style={{width: '100%', minHeight: '375px', marginBottom: '10px', backgroundColor: 'var(--black)', borderRadius: 'var(--border)'}}>
           <video 
             ref={videoRef} 
             autoPlay 
             playsInline 
             className="video-feed" 
-            style={{ transform: "scaleX(-1)" }} 
+            style={{ 
+              transform: "scaleX(-1)",
+              backgroundColor: 'var(--black)',
+              borderRadius: 'var(--border)' }
+            } 
+            width="100%"
           />
           
           {cameraActive && (
@@ -150,17 +181,21 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
         
         <div className="controls">
           {!cameraActive ? (
-            <button onClick={startCamera}>Start Camera</button>
+            <button onClick={startCamera} style={photoButton}>
+              <img src={CameraIcon} alt="camera" width={20} height={20} style={{ marginRight: '10px' }}/>
+              Start Camera
+            </button>
           ) : (
             <button 
               onClick={captureImage} 
               disabled={countdown > 0 || isProcessing}
+              style={photoButton}
             >
               {countdown > 0 
                 ? `Capturing in ${countdown}...` 
                 : isProcessing
                   ? "Processing..."
-                  : "Capture Image"}
+                  : "Take a Photo"}
             </button>
           )}
         </div>
