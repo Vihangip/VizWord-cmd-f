@@ -28,10 +28,9 @@ function App() {
   }
 
   const dictonaryArea = {
-    backgroundImage: 'url("././images/your_dictionary.png")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundColor: 'var(--pink)',
+    backgroundImage: `url(${Dictionary})`,
+    backgroundSize: 'contain', 
+    backgroundRepeat: 'no-repeat',
     borderRadius: 'var(--border)',
     width: '60%',
     height: '85%',
@@ -51,7 +50,8 @@ function App() {
     justifyContents: 'center',
     alignItems: 'center',
     padding: '20px',
-    gap: '20px'
+    gap: '20px',
+    marginRight: '25px'
   }
 
   const props =  {
@@ -89,7 +89,7 @@ function App() {
             <CameraComponent selectedLanguage={selectedLanguage} setObjectData={setObjectData}/>
           </div>
           <div style={dictonaryArea}>
-            <h1 style={{margin: 0, color: 'var(--white)'}}>Your Dictionary</h1>
+            <h1 style={{margin: 0, color: 'var(--white)', marginRight: '25px'}}>Your Dictionary</h1>
             <div style={dictionaryLabel}>
               <img src={Star} width={30} height={30}/>
               <h2 style={{margin: 0, color: 'var(--black)'}}>7 Objects</h2>
