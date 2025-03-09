@@ -17,7 +17,7 @@ const Chat = ({ props }) => {
     // Case 1: No props at all
     if (!newProps) {
       setMessages([{
-        text: "Capture an image to learn more!",
+        text: "Take a picture to learn more!",
         fromUser: false
       }]);
       return;
@@ -219,7 +219,7 @@ const Chat = ({ props }) => {
   
   const chatbox = {
     backgroundColor: 'var(--yellow)',
-    height: '40%',
+    height: '57%',
     overflowY: 'auto',
     padding: '20px',
     display: 'flex',
@@ -302,7 +302,7 @@ const Chat = ({ props }) => {
         
         {showReset && (
         <button style={resetButton} onClick={handleResetClick}>
-            New Object
+            New Photo
         </button>
         )}
       </div>

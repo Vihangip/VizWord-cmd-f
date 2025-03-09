@@ -195,7 +195,7 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
                 ? `Capturing in ${countdown}...` 
                 : isProcessing
                   ? "Processing..."
-                  : "Capture Image"}
+                  : "Take a Photo"}
             </button>
           )}
         </div>
