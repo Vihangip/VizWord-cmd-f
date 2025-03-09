@@ -212,7 +212,6 @@ const Chat = ({ props }) => {
   
   const heading = {
     color: 'var(--purple)',
-    fontFamily: 'Helvetica-Bold',
     textAlign: 'left',
     margin: '0',
     padding: '20px' 
@@ -220,8 +219,7 @@ const Chat = ({ props }) => {
   
   const chatbox = {
     backgroundColor: 'var(--yellow)',
-    width: '100%',
-    height: '100%',
+    height: '40%',
     overflowY: 'auto',
     padding: '20px',
     display: 'flex',
