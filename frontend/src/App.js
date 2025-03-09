@@ -1,12 +1,12 @@
 import './App.css';
-import Camera from './CameraComponent.js';
+import CameraComponent from './CameraComponent.js';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
         <div>
-          <Camera/>
+          <CameraComponent/>
         </div>
         
       </header>
