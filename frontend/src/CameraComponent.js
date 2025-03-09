@@ -22,7 +22,7 @@ function Camera() {
   };
 
   const captureImage = () => {
-    let timeLeft = 4;
+    let timeLeft = 3;
     setCountdown(timeLeft);
 
     const countdownInterval = setInterval(() => {
