@@ -4,15 +4,21 @@ const axios = require('axios');
 const fs = require("fs");
 const path = require("path");
 const FormData = require('form-data');
+const cors = require('cors'); // Add this
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config();
 
+// Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
+
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(express.json());
@@ -57,8 +63,8 @@ app.post("/gemini", upload.single("image"), async (req, res) => {
     });
 
     const responseText = result.response.text().trim();
-    const cleanedResponse = responseText.replace(/```json\n|\n```/g, ""); 
-    const parsedResponse = JSON.parse(cleanedResponse); 
+    const cleanedResponse = responseText.replace(/```json\n|\n```/g, "");
+    const parsedResponse = JSON.parse(cleanedResponse);
     console.log("gemini response", parsedResponse);
 
     res.json({ response: parsedResponse });
@@ -73,7 +79,7 @@ app.post('/process-image', upload.single('image'), async (req, res) => {
   
   try {
     console.log("received by backend");
-    const language = req.body.language; 
+    const language = req.body.language;
     const image = req.file;
 
     if (!image) {
@@ -104,25 +110,39 @@ app.post('/process-image', upload.single('image'), async (req, res) => {
     }
 
     // Step 2: Process detections and send the result to /gemini endpoint
-    const detectedObjects = detections.map((detection) => detection.class).join(', ');
-    console.log(`Detected objects: ${detectedObjects}`);
+    const detectedObjects = detections.map((detection) => detection.class);
+    console.log(`Detected objects: ${detectedObjects.join(", ")}`);
+
+    // Determine the object to send
+    let object;
+    if (detectedObjects.length === 2 && detectedObjects.includes("person")) {
+    object = detectedObjects.find((obj) => obj !== "person"); // Get the non-person object
+    } else {
+    object = detectedObjects.join(", "); // If only one object, use it directly
+    }
+
+    console.log(`Selected object: ${object}`);
+
 
     // Create form data for the Gemini request
     const geminiFormData = new FormData();
     geminiFormData.append('image', fs.createReadStream(tempFilePath));
-    geminiFormData.append('object', detectedObjects);
+    geminiFormData.append('object', detectedObjects.join(', '));
     geminiFormData.append('language', language);
 
     console.log("Sending request to Gemini endpoint...");
-    const geminiResponse = await axios.post('http://localhost:3000/gemini', geminiFormData, {
+    const geminiResponse = await axios.post('http://localhost:3001/gemini', geminiFormData, {
       headers: geminiFormData.getHeaders(),
     });
 
-    console.log("everything done");
-    console.log("final response", geminiResponse.data);
+    const responseData = {
+      object: object, // Selected object excluding "person" if necessary
+      adjectives: geminiResponse.data.response // Extracted adjectives from Gemini response
+    };
     
-    // Step 3: Send the final response back to the client
-    return res.json(geminiResponse.data);
+    console.log("Final response:", responseData); // Debugging log
+    
+    return res.json(responseData);
   } catch (error) {
     console.error('Error processing image:', error);
     return res.status(500).json({ error: 'Failed to process image.', details: error.message });
@@ -139,7 +159,7 @@ app.post('/process-image', upload.single('image'), async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });

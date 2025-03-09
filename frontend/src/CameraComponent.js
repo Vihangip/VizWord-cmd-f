@@ -92,9 +92,9 @@ function Camera() {
       formData.append('image', blob, 'captured-image.png');
       formData.append('language', selectedLanguage);
       
-      // Send to Express server
+      // Send to Express server - updated port to 3001
       console.log(`Sending image to server with language: ${selectedLanguage}`);
-      const expressResponse = await fetch('http://localhost:3000/process-image', {
+      const expressResponse = await fetch('http://localhost:3001/process-image', {
         method: 'POST',
         body: formData
       });
