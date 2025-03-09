@@ -1,25 +1,19 @@
 import '../App.css';
 import Camera from './Camera.js';
-import { useState, Button } from 'react';
+import { useState } from 'react';
 
-function CameraComponent() {
-  const [language, setLanguage] = useState("French");
+function CameraComponent({ selectedLanguage }) {
   const [objectData, setObjectData] = useState(null);
   
   const handleResultsUpdate = (data) => {
     console.log("Received data in parent:", data);
-    setObjectData(data);
+    setObjectData(data); // Update App.js state
   };
-
-  const handleLanguageChange = (e) => {
-    setLanguage(e.target.value);
-  };
-
 
   return (
-    <div className="app-container" style={{minWidth: '100%'}} maxWidth={false}>
+    <div className="app-container" style={{ minWidth: '100%' }} maxWidth={false}>
       <Camera 
-        selectedLanguage={language} 
+        selectedLanguage={selectedLanguage} 
         onResultsUpdate={handleResultsUpdate} 
       />
     </div>

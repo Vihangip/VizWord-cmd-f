@@ -4,9 +4,11 @@ import Navbar from './components/navbar.js';
 import Dictionary from './images/your_dictionary.png';
 import Star from './images/star_icon.png';
 import CameraComponent from './components/CameraComponent.js';
+import { useState } from 'react';
 
 function App() {
-
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [objectData, setObjectData] = useState(null);
   const parent = {
     display: 'flex',
     backgroundColor: 'var(--white)',
@@ -19,7 +21,7 @@ function App() {
     padding: '20px',
     width: '100%',
     height: '100%',
-    //overflow: 'hidden'
+    overflow: 'hidden'
   }
 
   const dictonaryArea = {
@@ -49,13 +51,34 @@ function App() {
     gap: '20px'
   }
 
+  const props =  {
+    object: "bottle",
+    translation: "Botella",
+    adjectives: [
+      {
+          "english": "clear",
+          "translation": "claro/a"
+      },
+      {
+          "english": "plastic",
+          "translation": "de plástico"
+      },
+      {
+          "english": "cylindrical",
+          "translation": "cilíndrico/a"
+      }
+    ]
+  }
+
+  console.log(`Dropdown: My object is extensible? ${Object.isExtensible(props)}`);
+
   return (
     <div className="App">
-      <Navbar/>
+      <Navbar selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage}/>
       <div style={parent}>
         <div style={child}>
           <div style={{borderRadius: 'var(--border)', paddingBottom: '30px'}}>
-            <CameraComponent/>
+            <CameraComponent selectedLanguage={selectedLanguage} setObjectData={setObjectData}/>
           </div>
           <div style={dictonaryArea}>
             <h1 style={{margin: 0, color: 'var(--white)'}}>Your Dictionary</h1>
@@ -66,7 +89,7 @@ function App() {
           </div>
         </div>
         <div style={child}>
-          <Chat/>
+          <Chat props={props}/>
         </div>
       </div>
     </div>

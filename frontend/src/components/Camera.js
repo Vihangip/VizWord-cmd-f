@@ -135,7 +135,7 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
 
   return (
     <div className="App" style={{minWidth: '100%', backgroundColor: 'var(--white)'}}>
-        <div className="camera-container" style={{width: '100%', marginBottom: '10px'}}>
+        <div className="camera-container" style={{width: '100%', minHeight: '375px', marginBottom: '10px', backgroundColor: 'var(--black)', borderRadius: 'var(--border)'}}>
           <video 
             ref={videoRef} 
             autoPlay 
@@ -143,7 +143,7 @@ function Camera({ selectedLanguage, onResultsUpdate }) {
             className="video-feed" 
             style={{ 
               transform: "scaleX(-1)",
-              backgroundColor: 'var(--white)',
+              backgroundColor: 'var(--black)',
               borderRadius: 'var(--border)' }
             } 
             width="100%"
