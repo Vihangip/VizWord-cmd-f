@@ -7,7 +7,7 @@ import * as THREE from 'three';
 function ModelWithBounds({ modelPath, texturePath }) {
   const { scene } = useGLTF(modelPath);
   const texture = new THREE.TextureLoader().load(texturePath);
-  texture.colorSpace = THREE.LinearSRGBColorSpace;
+  texture.colorSpace = THREE.SRGBColorSpace;
   texture.flipY = false;
   
   useEffect(() => {
@@ -19,7 +19,9 @@ function ModelWithBounds({ modelPath, texturePath }) {
           child.material.map.wrapT = THREE.RepeatWrapping;
           child.material.roughness = 0.8; // Increase roughness to reduce glossiness
           child.material.metalness = 0.1; // Decrease metalness to make it less metallic
-
+          child.material = new THREE.MeshToonMaterial({
+            map: texture,
+        });
           child.material.needsUpdate = true;
           child.geometry.attributes.uv.needsUpdate = true;
           child.material.vertexColors = false;
@@ -62,25 +64,25 @@ function ThreeDComponent({ modelPath, texturePath }) {
       bottom: 0,
       left: '50%',
       transform: 'translateX(-50%)',
-      width: '200px',
+      width: '250px',
       height: '300px',
       zIndex: 10,
     }}>
       <Canvas 
-        gl={{ colorSpace: 'linear-srgb' }}
+        gl={{ colorSpace: THREE.LinearSRGBColorSpace }}
         camera={{ position: [60, 10, 40], fov: 30 }}
         // Disable all controls/interactions
         onPointerDown={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
       >
         {/* Lighting */}
-        <ambientLight intensity={1} />
-        <directionalLight intensity={0.6} position={[5, 5, 5]} />
+        <ambientLight intensity={1.5} />
+        <directionalLight intensity={1} position={[5, 5, 5]} />
         <directionalLight intensity={0.4} position={[-5, 5, -5]} />
         
         
         {/* Bounds component to fit the model to view */}
-        <Bounds clip observe margin={0.7}>
+        <Bounds clip observe margin={0.9}>
           <Suspense fallback={null}>
             <SceneBounds>
               <Center>
