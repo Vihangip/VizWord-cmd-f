@@ -131,15 +131,24 @@ app.post('/process-image', upload.single('image'), async (req, res) => {
     geminiFormData.append('language', language);
 
     console.log("Sending request to Gemini endpoint...");
-    const geminiResponse = await axios.post('http://localhost:3001/gemini', geminiFormData, {
-      headers: geminiFormData.getHeaders(),
-    });
+    // const geminiResponse = await axios.post('http://localhost:3001/gemini', geminiFormData, {
+    //   headers: geminiFormData.getHeaders(),
+    // });
 
-    const responseData = {
-      object: object, // Selected object excluding "person" if necessary
-      adjectives: geminiResponse.data.response // Extracted adjectives from Gemini response
-    };
+    // const responseData = {
+    //   object: object, // Selected object excluding "person" if necessary
+    //   adjectives: geminiResponse.data.response // Extracted adjectives from Gemini response
+    // };
     
+    const responseData = {
+       object: 'apple',
+       translation: 'Manzana',
+       adjectives: [
+         { english: 'clear', translation: 'claro/transparente' },
+         { english: 'cylindrical', translation: 'cilíndrico' },
+         { english: 'glass', translation: 'vidrio' }
+       ]
+     }
     console.log("Final response:", responseData); // Debugging log
     
     return res.json(responseData);
