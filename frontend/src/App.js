@@ -5,11 +5,7 @@ import Navbar from './components/navbar.js';
 import Camera from './images/camera_icon.png';
 import Dictionary from './images/your_dictionary.png';
 import CameraComponent from './CameraComponent.js';
-import { Button } from '@mui/material';
-import Chat from './components/chat.js';
-import Navbar from './components/navbar';
-import Camera from './images/camera_icon.png';
-import Dictionary from './images/your_dictionary.png';
+
 
 function App() {
 
