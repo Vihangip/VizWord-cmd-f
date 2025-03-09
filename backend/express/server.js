@@ -33,7 +33,38 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey);
 const MODEL_NAME = "gemini-2.0-pro-exp-02-05";
 
-app.post("/gemini", upload.single("image"), async (req, res) => {
+app.post('/gemini-translate', async (req, res) => {
+  try {
+    const { object, language } = req.body;
+    if (!object || !language) {
+      return res.status(400).json({ error: "Object and language are required." });
+    }
+
+    // Prepare request for Gemini API
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+
+    const result = await model.generateContent({
+      contents: [
+        {
+          parts: [
+            { text: `Give me the answer only. What is '${object}' in ${language}?` }
+          ],
+        },
+      ],
+    });
+
+    let response = result.response.text().trim();
+    
+    console.log("gemini translation response:", response);
+    
+    res.json({ result: response });
+  } catch (error) {
+    console.error("Error generating translation:", error);
+    res.status(500).json({ error: "Failed to generate translation.", details: error.message });
+  }
+});
+
+app.post("/gemini-adjectives", upload.single("image"), async (req, res) => {
   try {
     console.log("sending to gemini");
     const { object, language } = req.body;
@@ -53,8 +84,8 @@ app.post("/gemini", upload.single("image"), async (req, res) => {
         {
           parts: [
             { inline_data: { mime_type: "image/jpeg", data: base64Image } }, // Image part
-            { text: `Give me the '${language}' translation for the word '${object}'. Additionally, give 3 adjectives about the '${object}' in this image. You can use adjectives 
-            like colour, material, texture, size, etc. Also, provide the equivalent translations. 
+            { text: `Give 3 adjectives about the '${object}' in this image. You can use adjectives 
+            like colour, material, texture, size, etc. Also, provide the equivalent '${language}' translations. 
             In your response, only give me an array of objects with the english words and translations as key value pairs 
             where keys are "english" and "translation"` }, // Prompt part
           ],
@@ -131,13 +162,21 @@ app.post('/process-image', upload.single('image'), async (req, res) => {
     geminiFormData.append('language', language);
 
     console.log("Sending request to Gemini endpoint...");
-    const geminiResponse = await axios.post('http://localhost:3001/gemini', geminiFormData, {
+    const geminiAdjectivesResponse = await axios.post('http://localhost:3001/gemini-adjectives', geminiFormData, {
       headers: geminiFormData.getHeaders(),
     });
 
+    const translationResponse = await axios.post('http://localhost:3001/gemini-translate', {
+      object: object,
+      language: language
+    });
+    const translation = translationResponse.data.result;
+    console.log(`Translation result: ${translation}`);
+
     const responseData = {
-      object: object, // Selected object excluding "person" if necessary
-      adjectives: geminiResponse.data.response // Extracted adjectives from Gemini response
+      object: object,
+      translation: translation,
+      adjectives: geminiAdjectivesResponse.data.response 
     };
     
     console.log("Final response:", responseData); // Debugging log
