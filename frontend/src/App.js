@@ -10,7 +10,7 @@ import ThreeDComponent from './components/ThreeDComponent.js';
 import mascot from './images/mascot.glb';
 
 function App() {
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [selectedLanguage, setSelectedLanguage] = useState('French');
   const [objectData, setObjectData] = useState(null);
   const parent = {
     display: 'flex',

@@ -23,12 +23,11 @@ const DropdownMenu = ({ selectedLanguage, setSelectedLanguage }) => {
                 label="Select your Learning Language"
                 style={select}
             >
-                <MenuItem value={"English"}>English</MenuItem>
                 <MenuItem value={"French"}>French</MenuItem>
                 <MenuItem value={"German"}>German</MenuItem>
                 <MenuItem value={"Mandarin"}>Mandarin</MenuItem>
-                <MenuItem value={"Sinha"}>Sinha</MenuItem>
                 <MenuItem value={"Spanish"}>Spanish</MenuItem>
+                <MenuItem value={"Spanish"}>Turkish</MenuItem>
             </Select>
         </FormControl>
     );
