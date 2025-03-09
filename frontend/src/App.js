@@ -6,7 +6,6 @@ import Camera from './images/camera_icon.png';
 import Dictionary from './images/your_dictionary.png';
 import CameraComponent from './CameraComponent.js';
 
-
 function App() {
 
   const parent = {
